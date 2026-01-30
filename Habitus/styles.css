@@ -1,0 +1,257 @@
+/* Base Styles */
+body {
+  box-sizing: border-box;
+}
+
+* {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Card Styles */
+.card {
+  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+/* Button Styles */
+.btn {
+  transition: all 0.2s ease;
+}
+
+.btn:hover:not(:disabled) {
+  transform: scale(1.02);
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Modal Styles */
+.modal-overlay {
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-content {
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Progress Bar */
+.progress-bar {
+  transition: width 0.5s ease;
+}
+
+/* Streak Glow Effect */
+.streak-glow {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+/* Focus Styles */
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #6366f1;
+}
+
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+}
+
+/* No Scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Navigation Button Styles */
+.nav-btn {
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.nav-btn.active {
+  background: rgba(99, 102, 241, 0.2);
+}
+
+.nav-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 3px;
+  background: #6366f1;
+  border-radius: 3px 3px 0 0;
+}
+
+/* Page Transition */
+.page {
+  animation: fadeInPage 0.4s ease;
+}
+
+@keyframes fadeInPage {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Icon Button */
+.icon-btn svg {
+  color: currentColor;
+}
+
+/* Plus Menu Animation */
+.plus-menu-item {
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+/* Plus Icon Rotation */
+#plus-icon-svg {
+  transition: transform 0.3s ease;
+}
+
+/* View Transition */
+@view-transition {
+  navigation: auto;
+}
+
+/* Sport Page Styles */
+.input-dark { 
+  background: rgba(255, 255, 255, 0.08); 
+  border-radius: 0.75rem; 
+  padding: 0.6rem 1rem; 
+  color: white; 
+  width: 100%; 
+  outline: none; 
+  border: 1px solid transparent; 
+}
+
+input[type=range] { 
+  -webkit-appearance: none; 
+  width: 100%; 
+  background: transparent; 
+}
+
+input[type=range]::-webkit-slider-runnable-track { 
+  height: 4px; 
+  background: rgba(255,255,255,0.1); 
+  border-radius: 2px; 
+}
+
+input[type=range]::-webkit-slider-thumb { 
+  -webkit-appearance: none; 
+  height: 18px; 
+  width: 18px; 
+  border-radius: 50%; 
+  background: #6366f1; 
+  margin-top: -7px; 
+}
+
+.tab-active { 
+  color: #6366f1; 
+  position: relative; 
+}
+
+.sport-tab {
+  position: relative;
+}
+
+.sport-tab:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.block-compact { 
+  background: rgba(249, 115, 22, 0.1) !important; 
+  border: 1px solid rgba(249, 115, 22, 0.2); 
+}
+
+@keyframes pulse-glow { 
+  0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); } 
+  70% { box-shadow: 0 0 0 20px rgba(99, 102, 241, 0); } 
+  100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); } 
+}
+
+.timer-active { 
+  animation: pulse-glow 2s infinite; 
+}
+
+/* Force white text on sport page */
+#sport-page {
+  color: white;
+}
+
+/* Sport Modal Animations */
+#sport-delete-modal > div:first-child,
+#sport-type-modal > div:first-child,
+#habit-delete-modal > div:first-child,
+#todo-delete-modal > div:first-child {
+  animation: fadeIn 0.2s ease;
+}
+
+#sport-delete-modal > div:last-child,
+#sport-type-modal > div:last-child,
+#habit-delete-modal > div:last-child,
+#todo-delete-modal > div:last-child {
+  animation: slideUpModal 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideUpModal {
+  from { 
+    opacity: 0; 
+    transform: translate(-50%, -40%) scale(0.95);
+  }
+  to { 
+    opacity: 1; 
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* Mobile specific animation for type modal */
+@media (max-width: 640px) {
+  #sport-type-modal > div:last-child {
+    animation: slideUpMobile 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  @keyframes slideUpMobile {
+    from { 
+      opacity: 0; 
+      transform: translateY(100%);
+    }
+    to { 
+      opacity: 1; 
+      transform: translateY(0);
+    }
+  }
+}
+

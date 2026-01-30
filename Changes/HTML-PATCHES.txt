@@ -1,0 +1,158 @@
+# ====================================================================
+# EXAKTE HTML-PATCHES FÜR INDEX.HTML
+# ====================================================================
+
+# ACHTUNG: Suche die markierten Zeilen in deiner index.html und 
+# ersetze/füge die Code-Blöcke ein wie angegeben!
+
+# ====================================================================
+# PATCH 1: STREAK CARD KLICKBAR MACHEN (~Zeile 234)
+# ====================================================================
+
+## SUCHE NACH:
+```html
+<div class="card p-5 rounded-[2rem] bg-gradient-to-br from-orange-500/10 to-transparent border border-orange-500/20">
+  <div class="flex items-center gap-2 mb-3">
+    <div class="p-2 rounded-xl bg-orange-500/20 text-orange-500">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+    </div>
+    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Streak</span>
+  </div>
+  <div class="flex items-baseline gap-1">
+    <span id="stat-streak" class="text-3xl font-bold text-orange-500">0</span>
+    <span class="text-xs text-orange-500/60 font-semibold">Tage</span>
+  </div>
+</div>
+```
+
+## ERSETZE MIT:
+```html
+<div class="card p-5 rounded-[2rem] bg-gradient-to-br from-orange-500/10 to-transparent border border-orange-500/20 cursor-pointer hover:scale-105 transition-transform active:scale-95" onclick="openStreakDetails()">
+  <div id="dashboard-total-streak">
+    <div class="flex items-center gap-2 mb-3">
+      <div class="p-2 rounded-xl bg-orange-500/20 text-orange-500">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+      </div>
+      <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Streak</span>
+    </div>
+    <div class="flex items-baseline gap-1">
+      <span id="stat-streak" class="text-3xl font-bold text-orange-500">0</span>
+      <span class="text-xs text-orange-500/60 font-semibold">Tage</span>
+    </div>
+  </div>
+</div>
+```
+
+# ====================================================================
+# PATCH 2: STREAK DETAILS PAGE HINZUFÜGEN (~nach Zeile 277)
+# ====================================================================
+
+## SUCHE NACH:
+```html
+  </div>
+</main><!-- Habits Page -->
+```
+
+## FÜGE DIREKT DANACH EIN (VOR "Habits Page"):
+```html
+<!-- Streak Details Page -->
+<main id="streak-details-page" class="page px-3 sm:px-6 py-6 sm:py-8 pb-24 sm:pb-32 hidden">
+  <div class="max-w-4xl mx-auto">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-bold text-white">🔥 Streak Details</h2>
+      <button onclick="navigateToPage('stats')" class="p-2 bg-white/10 rounded-xl text-white hover:bg-white/20 transition-all">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div id="streak-details-content"></div>
+  </div>
+</main>
+
+```
+
+# ====================================================================
+# PATCH 3: PAUSE BUTTON IM SPORT PLAYER (~Zeile 765)
+# ====================================================================
+
+## SUCHE NACH:
+```html
+    <div class="mt-auto space-y-4">
+      <button id="player-action-btn" onclick="handlePlayerAction()" class="w-full py-6 bg-white text-black rounded-[2rem] font-black text-2xl active:scale-95 transition-all shadow-2xl">WEITER</button>
+      <button onclick="nextSportBlock()" class="w-full py-3 text-gray-500 font-bold text-xs uppercase tracking-widest">Überspringen</button>
+    </div>
+```
+
+## ERSETZE MIT:
+```html
+    <div class="mt-auto space-y-4">
+      <!-- NEW: Pause Button -->
+      <button id="player-pause-btn" onclick="togglePause()" class="w-full px-6 py-3 bg-white/10 rounded-2xl font-bold text-white hover:bg-white/20 transition-all flex items-center justify-center gap-2 hidden">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="6" y="4" width="4" height="16"/>
+          <rect x="14" y="4" width="4" height="16"/>
+        </svg>
+        <span>Pause</span>
+      </button>
+      
+      <button id="player-action-btn" onclick="handlePlayerAction()" class="w-full py-6 bg-white text-black rounded-[2rem] font-black text-2xl active:scale-95 transition-all shadow-2xl">WEITER</button>
+      <button onclick="nextSportBlock()" class="w-full py-3 text-gray-500 font-bold text-xs uppercase tracking-widest">Überspringen</button>
+    </div>
+```
+
+# ====================================================================
+# PATCH 4: SETS MODE CHECKBOX (~Zeile 776)
+# ====================================================================
+
+## SUCHE NACH:
+```html
+      <div class="flex items-center gap-2 mb-4 sm:mb-6 bg-white/5 p-2 sm:p-3 rounded-2xl w-fit">
+        <input type="checkbox" id="sync-names-check" onchange="syncAllBlockNames()" class="w-4 h-4 accent-indigo-500">
+        <label for="sync-names-check" class="text-[9px] sm:text-[10px] font-bold uppercase text-gray-400">Name-Sync</label>
+      </div>
+```
+
+## FÜGE DIREKT DANACH EIN:
+```html
+      <div class="flex items-center gap-2 mb-4 sm:mb-6 bg-white/5 p-2 sm:p-3 rounded-2xl w-fit">
+        <input type="checkbox" id="sets-mode-check" onchange="toggleSetsMode()" class="w-4 h-4 accent-orange-500">
+        <label for="sets-mode-check" class="text-[9px] sm:text-[10px] font-bold uppercase text-gray-400">Sets Modus</label>
+      </div>
+```
+
+# ====================================================================
+# PATCH 5: SCRIPT-TAGS AKTUALISIEREN (ganz unten, vor </body>)
+# ====================================================================
+
+## SUCHE NACH:
+```html
+  <script src="app.js"></script>
+  <script src="sport.js"></script>
+  <script src="custom-modals.js"></script>
+  <script src="dynamic-color-override.js"></script>
+```
+
+## ERSETZE MIT:
+```html
+  <script src="app.js"></script>
+  <script src="streak-system.js"></script>
+  <script src="sport.js"></script>
+  <script src="custom-modals.js"></script>
+  <script src="dynamic-color-override.js"></script>
+```
+
+# ====================================================================
+# FERTIG!
+# ====================================================================
+
+Das waren ALLE HTML-Änderungen! 
+
+Zusammenfassung:
+1. ✅ Streak Card klickbar gemacht
+2. ✅ Streak Details Page hinzugefügt
+3. ✅ Pause Button eingefügt
+4. ✅ Sets Mode Checkbox hinzugefügt
+5. ✅ streak-system.js Script-Tag hinzugefügt
+
+Nach diesen Änderungen sollte die HTML-Datei bereit sein!
