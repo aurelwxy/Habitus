@@ -5,7 +5,9 @@ const urlsToCache = [
   '/manifest.json',
   '/styles.css',
   '/app.js',
-  '/sport.js'
+  '/sport.js',
+  '/icon-192.png',
+  '/icon-512.png'
 ];
 
 // Installation: Cache befüllen
