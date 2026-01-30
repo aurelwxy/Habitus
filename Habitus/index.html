@@ -822,14 +822,8 @@
   <script src="sport.js"></script>
   <script src="custom-modals.js"></script>
   <script src="dynamic-color-override.js"></script>
+  <script src="pwa.js"></script>
   <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('Service Worker registriert!', reg))
-          .catch(err => console.error('Registrierung fehlgeschlagen:', err));
-      });
-    }
 
     // --- PLUS BUTTON LOGIC ---
     let isPlusMenuOpen = false;

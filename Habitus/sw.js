@@ -2,11 +2,14 @@ const CACHE_NAME = 'v3_cache'; // Version erhöht auf v3
 const urlsToCache = [
   '/',
   '/index.html',
+  '/manifest.json',
+  '/styles.css',
+  '/app.js',
+  '/sport.js'
 ];
 
 // Installation: Cache befüllen
 self.addEventListener('install', (event) => {
-  // skipWaiting zwingt den neuen SW, sofort die Kontrolle zu übernehmen
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache))
@@ -27,16 +30,25 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
-  // Sofortige Kontrolle über alle Tabs übernehmen
   return self.clients.claim();
 });
 
-// Fetch-Strategie: Network First (Besser für die Entwicklung!)
-// Erst im Netz nachschauen, wenn offline, dann Cache.
+// Fetch-Strategie:
+// - Navigations-Requests: Network First, fallback auf /index.html aus Cache
+// - Ressourcen: Cache First
 self.addEventListener('fetch', (event) => {
+  // Handle navigation requests (single-page app)
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match('/index.html'))
+    );
+    return;
+  }
+
+  // For other requests, try cache first then network
   event.respondWith(
-    fetch(event.request).catch(() => {
-      return caches.match(event.request);
+    caches.match(event.request).then((cachedResponse) => {
+      return cachedResponse || fetch(event.request);
     })
   );
 });

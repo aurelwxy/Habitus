@@ -1,11 +1,41 @@
-// Service Worker Registration
+// Service Worker Registration + beforeinstallprompt handling
+let deferredPrompt = null;
+
 if ('serviceWorker' in navigator) {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    // Prevent the mini-infobar from appearing on mobile
+    e.preventDefault();
+    deferredPrompt = e;
+    window.deferredPrompt = e; // expose for manual triggering
+    console.log('beforeinstallprompt event gespeichert');
+  });
+
+  window.addEventListener('appinstalled', () => {
+    console.log('App wurde installiert');
+    deferredPrompt = null;
+    window.deferredPrompt = null;
+  });
+
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
       .then(reg => console.log('Service Worker registriert!', reg))
       .catch(err => console.error('Registrierung fehlgeschlagen:', err));
   });
 }
+
+// Helper: trigger install prompt programmatically (e.g., call window.triggerPwaInstall())
+window.triggerPwaInstall = async () => {
+  if (!deferredPrompt) {
+    console.log('Kein Install-Prompt verfügbar');
+    return false;
+  }
+  deferredPrompt.prompt();
+  const choice = await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  window.deferredPrompt = null;
+  console.log('Install prompt choice:', choice.outcome);
+  return choice;
+};
 
 // Plus Button Logic
 let isPlusMenuOpen = false;
@@ -53,5 +83,7 @@ function handlePlusSelection(type) {
   } else if (type === 'todo') {
     if (typeof openTodoModal === 'function') openTodoModal();
     else navigateToPage('todos');
+  } else if (type === 'workout') {
+    if (typeof openCreateWorkoutModal === 'function') openCreateWorkoutModal();
   }
 }
