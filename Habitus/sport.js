@@ -631,111 +631,124 @@ function syncAllBlockNames() {
 }
 
 function saveSportWorkout() {
-  const name = document.getElementById('workout-name').value.trim();
-  if (!name) {
-    alert('Bitte gib einen Workout-Namen ein.');
-    return;
-  }
+  try {
+    const name = document.getElementById('workout-name').value.trim();
+    console.log('saveSportWorkout called', { name });
+    if (!name) {
+      alert('Bitte gib einen Workout-Namen ein.');
+      return;
+    }
 
-  const setsModeEnabled = document.getElementById('sets-mode-check').checked;
-  let workoutData;
-  
-  if (setsModeEnabled) {
-    // Save workout with sets
-    const sets = [];
-    document.querySelectorAll('.set-section').forEach(setDiv => {
-      const setName = setDiv.querySelector('.set-name-input').value.trim() || 'Unbenanntes Set';
-      const blocks = [];
-      
-      setDiv.querySelectorAll('.block-row').forEach(row => {
-        const blockName = row.querySelector('.block-name').value.trim() || 'Übung';
-        const type = row.querySelector('.block-type').value;
+    const setsModeEnabled = document.getElementById('sets-mode-check').checked;
+    let workoutData;
+    
+    if (setsModeEnabled) {
+      // Save workout with sets
+      const sets = [];
+      document.querySelectorAll('.set-section').forEach(setDiv => {
+        const setName = setDiv.querySelector('.set-name-input').value.trim() || 'Unbenanntes Set';
+        const blocks = [];
         
-        const block = { name: blockName, type };
+        setDiv.querySelectorAll('.block-row').forEach(row => {
+          const nameEl = row.querySelector('.block-name') || row.querySelector('.block-name-input');
+          const blockName = (nameEl ? nameEl.value.trim() : '') || 'Übung';
+          const typeEl = row.querySelector('.block-type') || row.querySelector('.block-type-select');
+          const type = typeEl ? typeEl.value : 'reps';
+
+          const block = { name: blockName, type };
+
+          if (type === 'reps') {
+            const reps = parseInt(row.querySelector('.block-reps')?.value) || 0;
+            const setsNum = parseInt(row.querySelector('.block-sets')?.value) || 0;
+            block.reps = reps;
+            block.sets = setsNum;
+          } else if (type === 'zeit') {
+            block.zeit = parseInt(row.querySelector('.block-zeit')?.value) || 0;
+          } else if (type === 'pause') {
+            block.pause = parseInt(row.querySelector('.block-pause')?.value) || 0;
+          }
+
+          blocks.push(block);
+        });
         
-        if (type === 'reps') {
-          block.reps = parseInt(row.querySelector('.block-reps').value) || 0;
-          block.sets = parseInt(row.querySelector('.block-sets').value) || 0;
-        } else if (type === 'zeit') {
-          block.zeit = parseInt(row.querySelector('.block-zeit').value) || 0;
-        } else if (type === 'pause') {
-          block.pause = parseInt(row.querySelector('.block-pause').value) || 0;
+        if (blocks.length > 0) {
+          sets.push({ name: setName, blocks });
         }
-        
-        blocks.push(block);
       });
       
-      if (blocks.length > 0) {
-        sets.push({ name: setName, blocks });
+      if (sets.length === 0) {
+        alert('Bitte füge mindestens ein Set mit Blöcken hinzu.');
+        return;
       }
-    });
-    
-    if (sets.length === 0) {
-      alert('Bitte füge mindestens ein Set mit Blöcken hinzu.');
-      return;
-    }
-    
-    workoutData = {
-      id: editingWorkoutId || Date.now().toString(),
-      name,
-      setsMode: true,
-      sets,
-      createdAt: editingWorkoutId ? workouts.find(w => w.id === editingWorkoutId).createdAt : new Date().toISOString()
-    };
-  } else {
-    // Save regular workout (supports both old compact editor and new inline editor)
-    const blocks = [];
-    document.querySelectorAll('.block-row').forEach(row => {
-      // name field: either .block-name (enhanced) or .block-name-input (old)
-      const nameEl = row.querySelector('.block-name') || row.querySelector('.block-name-input');
-      const blockName = (nameEl ? nameEl.value.trim() : '') || 'Übung';
+      
+      workoutData = {
+        id: editingWorkoutId || Date.now().toString(),
+        name,
+        setsMode: true,
+        sets,
+        createdAt: editingWorkoutId ? workouts.find(w => w.id === editingWorkoutId).createdAt : new Date().toISOString()
+      };
+    } else {
+      // Save regular workout (supports both old compact editor and new inline editor)
+      const blocks = [];
+      document.querySelectorAll('.block-row').forEach(row => {
+        // name field: either .block-name (enhanced) or .block-name-input (old)
+        const nameEl = row.querySelector('.block-name') || row.querySelector('.block-name-input');
+        const blockName = (nameEl ? nameEl.value.trim() : '') || 'Übung';
 
-      // type field: either .block-type (enhanced) or .block-type-select (old)
-      const typeEl = row.querySelector('.block-type') || row.querySelector('.block-type-select');
-      const type = typeEl ? typeEl.value : 'reps';
+        // type field: either .block-type (enhanced) or .block-type-select (old)
+        const typeEl = row.querySelector('.block-type') || row.querySelector('.block-type-select');
+        const type = typeEl ? typeEl.value : 'reps';
 
-      const block = { name: blockName, type };
+        const block = { name: blockName, type };
 
-      if (type === 'reps') {
-        const repsEl = row.querySelector('.block-reps');
-        const setsEl = row.querySelector('.block-sets');
-        block.reps = parseInt(repsEl?.value) || 0;
-        block.sets = parseInt(setsEl?.value) || 0;
-      } else if (type === 'zeit') {
-        const zeitEl = row.querySelector('.block-zeit') || row.querySelector('.block-seconds-range');
-        block.zeit = parseInt(zeitEl?.value) || 0;
-      } else if (type === 'pause') {
-        const pauseEl = row.querySelector('.block-pause') || row.querySelector('.block-seconds-range');
-        block.pause = parseInt(pauseEl?.value) || 0;
+        if (type === 'reps') {
+          const repsEl = row.querySelector('.block-reps');
+          const setsEl = row.querySelector('.block-sets');
+          block.reps = parseInt(repsEl?.value) || 0;
+          block.sets = parseInt(setsEl?.value) || 0;
+        } else if (type === 'zeit') {
+          const zeitEl = row.querySelector('.block-zeit') || row.querySelector('.block-seconds-range');
+          block.zeit = parseInt(zeitEl?.value) || 0;
+        } else if (type === 'pause') {
+          const pauseEl = row.querySelector('.block-pause') || row.querySelector('.block-seconds-range');
+          block.pause = parseInt(pauseEl?.value) || 0;
+        }
+
+        blocks.push(block);
+      });
+
+      if (blocks.length === 0) {
+        alert('Bitte füge mindestens einen Block hinzu.');
+        return;
       }
 
-      blocks.push(block);
-    });
-
-    if (blocks.length === 0) {
-      alert('Bitte füge mindestens einen Block hinzu.');
-      return;
+      workoutData = {
+        id: editingWorkoutId || Date.now().toString(),
+        name,
+        setsMode: false,
+        blocks,
+        createdAt: editingWorkoutId ? workouts.find(w => w.id === editingWorkoutId).createdAt : new Date().toISOString()
+      };
     }
 
-    workoutData = {
-      id: editingWorkoutId || Date.now().toString(),
-      name,
-      setsMode: false,
-      blocks,
-      createdAt: editingWorkoutId ? workouts.find(w => w.id === editingWorkoutId).createdAt : new Date().toISOString()
-    };
-  }
+    if (editingWorkoutId) {
+      const index = workouts.findIndex(w => w.id === editingWorkoutId);
+      workouts[index] = workoutData;
+    } else {
+      workouts.push(workoutData);
+    }
 
-  if (editingWorkoutId) {
-    const index = workouts.findIndex(w => w.id === editingWorkoutId);
-    workouts[index] = workoutData;
-  } else {
-    workouts.push(workoutData);
-  }
+    localStorage.setItem('habitus_sport_workouts', JSON.stringify(workouts));
+    hideSportModal('sport-workout-modal');
+    renderSportPage();
 
-  localStorage.setItem('habitus_sport_workouts', JSON.stringify(workouts));
-  hideSportModal('sport-workout-modal');
-  renderSportPage();
+    if (typeof showToast === 'function') showToast('Workout gespeichert!', 'success');
+    else alert('Workout gespeichert!');
+  } catch (e) {
+    console.error('Error in saveSportWorkout:', e);
+    alert('Fehler beim Speichern: ' + (e && e.message ? e.message : e));
+  }
 }
 
 function editWorkout(id) {
@@ -834,7 +847,12 @@ function renderSportPage() {
         `;
       }).join('');
 
-  document.getElementById('sport-workouts-list').innerHTML = workoutsHtml;
+  const workoutsContainer = document.getElementById('sport-workouts-list') || document.getElementById('workout-list');
+  if (workoutsContainer) {
+    workoutsContainer.innerHTML = workoutsHtml;
+  } else {
+    console.warn('renderSportPage: No workouts container found (looked for sport-workouts-list, workout-list)');
+  }
 }
 
 function renderSportHistory() {
