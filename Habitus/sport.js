@@ -451,31 +451,114 @@ function addBlockToSet(setId) {
   blocksContainer.appendChild(blockDiv);
 }
 
-function addBlockRow() {
-  const container = document.getElementById('blocks-container');
-  const blockDiv = document.createElement('div');
-  blockDiv.className = 'block-row p-3 sm:p-4 card';
-  
-  blockDiv.innerHTML = `
-    <div class="flex flex-wrap gap-2 items-center">
-      <input type="text" class="block-name flex-1 min-w-[120px] input-dark text-sm sm:text-base" placeholder="Übungsname" style="padding: 0.6rem 1rem;">
-      <button type="button" onclick="showSportTypeModal(this.nextElementSibling)" class="block-type-display text-[9px] sm:text-[10px] px-3 sm:px-4 py-2 sm:py-3 bg-white/10 rounded-xl font-bold uppercase text-white whitespace-nowrap">
-        Reps
-      </button>
-      <select class="block-type hidden" onchange="handleTypeChange(this)">
-        <option value="reps">Reps</option>
-        <option value="zeit">Zeit</option>
-        <option value="pause">Pause</option>
-      </select>
-      <input type="number" class="block-reps w-16 sm:w-20 p-2 sm:p-3 input-dark text-center text-xs sm:text-sm font-bold" placeholder="12" min="0">
-      <input type="number" class="block-sets w-16 sm:w-20 p-2 sm:p-3 input-dark text-center text-xs sm:text-sm font-bold" placeholder="3" min="0">
-      <input type="number" class="block-zeit hidden w-20 sm:w-24 p-2 sm:p-3 input-dark text-center text-xs sm:text-sm font-bold" placeholder="60s" min="0">
-      <input type="number" class="block-pause hidden w-20 sm:w-24 p-2 sm:p-3 input-dark text-center text-xs sm:text-sm font-bold" placeholder="30s" min="0">
-      <button type="button" onclick="this.parentElement.parentElement.remove()" class="p-2 sm:p-3 bg-red-500/20 rounded-xl text-red-400 hover:bg-red-500/30 transition-all text-sm sm:text-base">×</button>
+function addBlockRow(data = null) {
+  // Old-style editor for normal mode (compact edit / confirm behaviour)
+  const div = document.createElement('div');
+  div.className = "block-row card p-4 bg-white/5 relative rounded-2xl";
+  const typeValue = data ? data.type : "reps";
+  const nameValue = data ? (data.name || '') : ((document.getElementById('sync-names-check') && document.getElementById('sync-names-check').checked) ? document.getElementById('workout-name').value : "");
+
+  div.innerHTML = `
+    <div class="edit-view space-y-4">
+      <div class="flex items-center gap-3">
+        <div class="drag-handle cursor-grab text-gray-600 text-xl opacity-30">⠿</div>
+        <input type="text" value="${nameValue}" placeholder="Name" class="block-name-input bg-transparent border-b border-white/10 flex-1 outline-none font-bold text-orange-400">
+        <button onclick="showSportTypeModal(this.nextElementSibling)" class="bg-white/5 text-white text-[10px] font-bold p-1.5 px-3 rounded type-display-btn">
+          ${typeValue === 'reps' ? 'Wdh.' : typeValue === 'zeit' ? 'Zeit' : 'Pause'}
+        </button>
+        <select class="hidden block-type-select">
+          <option value="reps" ${typeValue==='reps'?'selected':''}>Wdh.</option>
+          <option value="zeit" ${typeValue==='zeit'?'selected':''}>Zeit</option>
+          <option value="pause" ${typeValue==='pause'?'selected':''}>Pause</option>
+        </select>
+        <button onclick="confirmBlock(this)" class="text-orange-500 font-bold text-lg">✓</button>
+      </div>
+      <div class="input-fields">
+        <div class="reps-area ${typeValue !== 'reps' ? 'hidden' : ''}">
+          <input type="number" value="${data?.reps || ''}" placeholder="Anzahl" class="input-dark text-sm block-reps">
+        </div>
+        <div class="time-area ${typeValue === 'reps' ? 'hidden' : ''}">
+          <div class="flex justify-between text-[10px] mb-2 text-gray-500 uppercase font-bold">
+            <span class="type-label">${typeValue==='pause'?'Pause':'Ziel'}</span>
+            <span class="text-orange-400 time-display">${Math.floor((data?.seconds||30)/60)}m ${(data?.seconds||30)%60}s</span>
+          </div>
+          <input type="range" min="5" max="600" step="5" value="${data?.seconds||30}" oninput="updateTimeLabel(this)" class="block-seconds-range">
+        </div>
+      </div>
+    </div>
+    <div class="compact-view hidden">
+      <div class="flex items-center justify-between p-3 rounded-xl bg-orange-500/10 border border-orange-500/20">
+        <div class="flex items-center gap-3 flex-1">
+          <div class="drag-handle cursor-grab text-orange-400 text-xl">⠿</div>
+          <div class="flex-1">
+            <span class="compact-name font-bold text-sm text-white block">${nameValue || 'Übung'}</span>
+            <span class="compact-val text-xs text-orange-400"></span>
+          </div>
+        </div>
+        <button onclick="editBlockRow(this)" class="text-[10px] font-bold text-orange-500 uppercase px-3 py-1 bg-orange-500/20 rounded-lg hover:bg-orange-500/30 transition-all">Edit</button>
+      </div>
     </div>
   `;
+
+  document.getElementById('blocks-container').appendChild(div);
+
+  // If data passed (editing existing workout), pre-fill and confirm to compact view
+  if (data) {
+    const row = document.querySelector('.block-row:last-child');
+    const nameEl = row.querySelector('.block-name-input');
+    if (nameEl) nameEl.value = data.name || '';
+    const typeEl = row.querySelector('.block-type-select');
+    if (typeEl) typeEl.value = data.type || 'reps';
+
+    if (data.type === 'reps') {
+      const repsEl = row.querySelector('.block-reps');
+      if (repsEl) repsEl.value = data.reps || '';
+    } else if (data.type === 'zeit') {
+      const range = row.querySelector('.block-seconds-range');
+      if (range) range.value = data.zeit || data.seconds || 0;
+      updateTimeLabel(range);
+    } else if (data.type === 'pause') {
+      const range = row.querySelector('.block-seconds-range');
+      if (range) range.value = data.pause || data.seconds || 0;
+      updateTimeLabel(range);
+    }
+
+    // show compact view
+    confirmBlock(row.querySelector('button[onclick*="confirmBlock"]'));
+  }
+}
+
+function confirmBlock(btn) {
+  const row = btn.closest('.block-row');
+  const type = row.querySelector('.block-type-select').value;
+  const val = type === 'reps' ? (row.querySelector('.block-reps').value + " Wdh.") : (Math.floor(row.querySelector('.block-seconds-range').value/60) + "m " + (row.querySelector('.block-seconds-range').value%60) + "s");
+  row.querySelector('.compact-val').innerText = val;
+  row.querySelector('.compact-name').innerText = row.querySelector('.block-name-input').value;
+  row.querySelector('.edit-view').classList.add('hidden');
+  row.querySelector('.compact-view').classList.remove('hidden');
+  row.classList.add('block-compact');
   
-  container.appendChild(blockDiv);
+  // Enable dragging for all drag handles
+  document.querySelectorAll('.drag-handle').forEach(handle => {
+    handle.style.cursor = 'grab';
+    handle.style.opacity = '1';
+  });
+}
+
+function editBlockRow(btn) {
+  const row = btn.closest('.block-row');
+  row.querySelector('.edit-view').classList.remove('hidden');
+  row.querySelector('.compact-view').classList.add('hidden');
+  row.classList.remove('block-compact');
+  
+  // Disable dragging for edit view drag handles
+  row.querySelector('.edit-view .drag-handle').style.cursor = 'not-allowed';
+  row.querySelector('.edit-view .drag-handle').style.opacity = '0.3';
+}
+
+function updateTimeLabel(input) {
+  const v = input.value;
+  input.previousElementSibling.querySelector('.time-display').innerText = `${Math.floor(v/60)}m ${v%60}s`;
 }
 
 function handleTypeChange(select) {
@@ -537,10 +620,10 @@ function syncAllBlockNames() {
       });
     });
   } else {
-    // Sync regular blocks
-    const blocks = document.querySelectorAll('.block-name');
-    blocks.forEach(input => {
-      if (input.value.trim() === '') {
+    // Sync regular blocks (support old and new editors)
+    const nameInputs = Array.from(document.querySelectorAll('.block-name')).concat(Array.from(document.querySelectorAll('.block-name-input')));
+    nameInputs.forEach(input => {
+      if (input && input.value.trim() === '') {
         input.value = workoutName;
       }
     });
@@ -600,31 +683,40 @@ function saveSportWorkout() {
       createdAt: editingWorkoutId ? workouts.find(w => w.id === editingWorkoutId).createdAt : new Date().toISOString()
     };
   } else {
-    // Save regular workout
+    // Save regular workout (supports both old compact editor and new inline editor)
     const blocks = [];
     document.querySelectorAll('.block-row').forEach(row => {
-      const blockName = row.querySelector('.block-name').value.trim() || 'Übung';
-      const type = row.querySelector('.block-type').value;
-      
+      // name field: either .block-name (enhanced) or .block-name-input (old)
+      const nameEl = row.querySelector('.block-name') || row.querySelector('.block-name-input');
+      const blockName = (nameEl ? nameEl.value.trim() : '') || 'Übung';
+
+      // type field: either .block-type (enhanced) or .block-type-select (old)
+      const typeEl = row.querySelector('.block-type') || row.querySelector('.block-type-select');
+      const type = typeEl ? typeEl.value : 'reps';
+
       const block = { name: blockName, type };
-      
+
       if (type === 'reps') {
-        block.reps = parseInt(row.querySelector('.block-reps').value) || 0;
-        block.sets = parseInt(row.querySelector('.block-sets').value) || 0;
+        const repsEl = row.querySelector('.block-reps');
+        const setsEl = row.querySelector('.block-sets');
+        block.reps = parseInt(repsEl?.value) || 0;
+        block.sets = parseInt(setsEl?.value) || 0;
       } else if (type === 'zeit') {
-        block.zeit = parseInt(row.querySelector('.block-zeit').value) || 0;
+        const zeitEl = row.querySelector('.block-zeit') || row.querySelector('.block-seconds-range');
+        block.zeit = parseInt(zeitEl?.value) || 0;
       } else if (type === 'pause') {
-        block.pause = parseInt(row.querySelector('.block-pause').value) || 0;
+        const pauseEl = row.querySelector('.block-pause') || row.querySelector('.block-seconds-range');
+        block.pause = parseInt(pauseEl?.value) || 0;
       }
-      
+
       blocks.push(block);
     });
-    
+
     if (blocks.length === 0) {
       alert('Bitte füge mindestens einen Block hinzu.');
       return;
     }
-    
+
     workoutData = {
       id: editingWorkoutId || Date.now().toString(),
       name,
@@ -686,23 +778,9 @@ function editWorkout(id) {
       });
     });
   } else {
-    // Load regular blocks
+    // Load regular blocks (use old compact editor by default for normal mode)
     workout.blocks.forEach(block => {
-      addBlockRow();
-      const row = document.querySelector('.block-row:last-child');
-      row.querySelector('.block-name').value = block.name;
-      row.querySelector('.block-type').value = block.type;
-      
-      if (block.type === 'reps') {
-        row.querySelector('.block-reps').value = block.reps || '';
-        row.querySelector('.block-sets').value = block.sets || '';
-      } else if (block.type === 'zeit') {
-        row.querySelector('.block-zeit').value = block.zeit || '';
-      } else if (block.type === 'pause') {
-        row.querySelector('.block-pause').value = block.pause || '';
-      }
-      
-      handleTypeChange(row.querySelector('.block-type'));
+      addBlockRow(block);
     });
   }
 
